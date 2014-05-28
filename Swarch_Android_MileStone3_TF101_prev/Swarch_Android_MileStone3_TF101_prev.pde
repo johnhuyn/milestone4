@@ -75,6 +75,8 @@ int playSize;
 PShape[] myPlayer;
 
 float[] rgb;
+int p1score;
+int p2score;
 void setup()
 {
 
@@ -140,7 +142,9 @@ void setup()
   playerNum = 0;
   myPlayer = new PShape[2];
   playSize = 0;
-
+  p1score = 0;
+  p2score = 0;
+  playerNum = 0;
   rgb = new float[6];
 }
 
@@ -159,31 +163,49 @@ void draw()
   }
   else
   {
-    //after user info is entered
-    //draw black background for game
-    background(0);
-
-    //displays username
-    displayUsername(); 
-
-    //Create the Player Cube
-    playerOne.run();
-
-    if (!maxFood)
+    if (p1score > p2score + 7|| p1score == 15)
     {
-      generateFood();
+      login = loadImage("victory.jpg");
+      image(login, 0, 0, displayWidth, displayHeight);
+      textSize(45);
+      text("Player 1 WInS", displayWidth/2, displayHeight/2 - 100);
     }
-    //place food around the board
-    for (int i = 0; i < 4; ++i)
+    else if(p2score > p1score +7 || p2score == 15)
     {
-      shape(myFood[i], xCoord[i], yCoord[i]);
+      login = loadImage("victory.jpg");
+      image(login, 0, 0, displayWidth, displayHeight);
+      textSize(25);
+      text("Player 2 WInS", displayWidth/2, displayHeight/2 - 100);
     }
-
-    generatePlayer();
-
-    for (int i = 0; i < numOfPlayers; ++i)
+    else
     {
-      shape(myPlayer[i], xCube[i], yCube[i]);
+      background(0);
+      //after user info is entered
+      //draw black background for game
+
+
+      //displays username
+      displayUsername(); 
+
+      //Create the Player Cube
+      playerOne.run();
+
+      if (!maxFood)
+      {
+        generateFood();
+      }
+      //place food around the board
+      for (int i = 0; i < 4; ++i)
+      {
+        shape(myFood[i], xCoord[i], yCoord[i]);
+      }
+
+      generatePlayer();
+
+      for (int i = 0; i < numOfPlayers; ++i)
+      {
+        shape(myPlayer[i], xCube[i], yCube[i]);
+      }
     }
   }
 }
@@ -207,7 +229,11 @@ void displayUsername()
   fill(255);
   textSize(25);
   text("User: " + nameField.getText(), 10, 30);
-  text("Score: " + playerOne.size, displayWidth - 200, 30);
+  text("Player 1 Score: " + p1score, displayWidth - 300, 30);
+  if (numOfPlayers > 1)
+  {
+    text("Player 2 Score: " + p2score, displayWidth - 300, 70);
+  }
 }
 
 //Creates the food pellets for the players to eat
@@ -229,17 +255,17 @@ void generateFood()
 
 void generatePlayer()
 {
-  for (int i = 0; i < 2; ++i)
+  for (int i = 0; i < playerNum; ++i)
   {
 
-    player1 = createShape(RECT, 0, 0, 50 + playerOne.size, 50 + playerOne.size);
+    player1 = createShape(RECT, 0, 0, 50 + p1score * 10, 50 + p1score * 10);
     player1.setFill(color(rgb[0], rgb[1], rgb[2]));
-    player2 = createShape(RECT, 0, 0, 50 + playerOne.size, 50 + playerOne.size);
+    player2 = createShape(RECT, 0, 0, 50 + p2score * 10, 50 + p2score * 10);
     player2.setFill(color(rgb[3], rgb[4], rgb[5]));
     shapeMode(CENTER);
     myPlayer[0] = player1;
     myPlayer[1] = player2;
-    if (i == 2)
+    if (i == playerNum)
     {
       maxPlayer = true;
     }
@@ -299,9 +325,13 @@ void oscEvent(OscMessage theOscMessage)
     xCoord[element] = theOscMessage.get(1).floatValue();
     yCoord[element] = theOscMessage.get(2).floatValue();
     shape(myFood[element], xCoord[element], yCoord[element]);
-    if (theOscMessage.get(3).intValue()+1 == playerNumber)
+    if (theOscMessage.get(3).intValue()+1 == 2)
     {  
-      playerOne.size += 1;
+      p2score = theOscMessage.get(4).intValue();
+    }
+    else if (theOscMessage.get(3).intValue()+1 == 1)
+    {
+      p1score = theOscMessage.get(4).intValue();
     }
   }
   else if (theOscMessage.addrPattern().equals("Incorrect Password"))
@@ -330,11 +360,17 @@ void oscEvent(OscMessage theOscMessage)
   }
   else if (theOscMessage.addrPattern().equals("Edge Collison"))
   {
-    if (theOscMessage.get(2).intValue()+1 == playerNumber)
+    if (theOscMessage.get(2).intValue()+1 == 2)
     { 
       xCube[theOscMessage.get(2).intValue()] = theOscMessage.get(0).floatValue();
       yCube[theOscMessage.get(2).intValue()] = theOscMessage.get(1).floatValue();
-      playerOne.size = 0;
+      p2score = theOscMessage.get(3).intValue();
+    }
+    else if (theOscMessage.get(2).intValue()+1 == 1)
+    {
+      xCube[theOscMessage.get(2).intValue()] = theOscMessage.get(0).floatValue();
+      yCube[theOscMessage.get(2).intValue()] = theOscMessage.get(1).floatValue();
+      p1score = theOscMessage.get(4).intValue();
     }
   }
   else if (theOscMessage.addrPattern().equals("Player Collison"))
@@ -343,7 +379,7 @@ void oscEvent(OscMessage theOscMessage)
     { 
       xCube[theOscMessage.get(2).intValue()] = theOscMessage.get(0).floatValue();
       yCube[theOscMessage.get(2).intValue()] = theOscMessage.get(1).floatValue();
-      playerOne.size += 10;
+      playerOne.size = theOscMessage.get(4).intValue();
     }
   }
 }

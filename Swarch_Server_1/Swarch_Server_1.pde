@@ -55,6 +55,7 @@ int s;
 
 float[] rgb;
 
+
 void setup() 
 {
 
@@ -198,6 +199,8 @@ void unitCollison()
         food.add(xCoord[i]);
         food.add(yCoord[i]);
         food.add(h);
+        score += 1;
+        food.add(score);
         oscP5.send(food);
         println("hit! " + " xCoord[i]: " + xCoord[i] + " yCoord[i]: "+ yCoord[i]);
       }
@@ -209,6 +212,8 @@ void unitCollison()
         edge.add(xCube[h]);
         edge.add(yCube[h]);
         edge.add(h);
+        score = 0;
+        edge.add(score);
         oscP5.send(edge);
       }
       else
@@ -222,7 +227,10 @@ void unitCollison()
           playerC.add(xCube[0]);
           playerC.add(yCube[0]);
           playerC.add(0);
+          size += 10;
+          playerC.add(size);
           oscP5.send(playerC);
+       
         }
         else if (((xCube[1] >= xCube[0] - pOneCenter - 5 && xCube[1] <= xCube[0] + pOneCenter + 5) &&
           (yCube[1] >= yCube[0] - pOneCenter - 5 && yCube[1] <= yCube[0] + pOneCenter + 5)))
@@ -233,6 +241,8 @@ void unitCollison()
           playerC.add(xCube[1]);
           playerC.add(yCube[1]);
           playerC.add(1);
+           size += 10;
+          playerC.add(size);
           oscP5.send(playerC);
         }
       }
